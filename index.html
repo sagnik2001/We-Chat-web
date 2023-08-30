@@ -21,6 +21,8 @@
     <script>
         // import SimplePeer from 'simple-peer';
         // This allows you to determine whether the microphone and camera are ready for use.
+        console.log(window.location)
+
         navigator.mediaDevices.enumerateDevices().then(function (devices) {
             devices.forEach(function (device) {
                 console.log(
@@ -31,7 +33,6 @@
 
         navigator.mediaDevices
             .getUserMedia({
-                video: true,
                 audio: true,
             })
             .then((stream) => {
