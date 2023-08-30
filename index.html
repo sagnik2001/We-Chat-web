@@ -1,13 +1,72 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<html>
+
+<head>
+    <style>
+        #outgoing {
+            width: 600px;
+            word-wrap: break-word;
+            white-space: normal;
+        }
+    </style>
+</head>
+
+<body>
+    <form>
+        <textarea id="incoming"></textarea>
+        <button type="submit">submit</button>
+    </form>
+    <pre id="outgoing"></pre>
+    <video src="" id="video"></video>
+    <script src="/node_modules/simple-peer/simplepeer.min.js"></script>
+    <script>
+        // import SimplePeer from 'simple-peer';
+        // This allows you to determine whether the microphone and camera are ready for use.
+        navigator.mediaDevices.enumerateDevices().then(function (devices) {
+            devices.forEach(function (device) {
+                console.log(
+                    device.kind + ": " + device.label + " id = " + device.deviceId
+                );
+            });
+        });
+
+        navigator.mediaDevices
+            .getUserMedia({
+                video: true,
+                audio: true,
+            })
+            .then((stream) => {
+                const p = new SimplePeer({
+                    initiator: location.hash === "#1",
+                    trickle: false,
+                    stream,
+                });
+                p.on("error", (err) => console.log("error", err));
+                p.on("signal", (data) => {
+                    console.log("SIGNAL", JSON.stringify(data));
+                    document.querySelector("#outgoing").textContent =
+                        JSON.stringify(data);
+                });
+                document.querySelector("form").addEventListener("submit", (ev) => {
+                    ev.preventDefault();
+                    p.signal(JSON.parse(document.querySelector("#incoming").value));
+                });
+                p.on("connect", () => {
+                    console.log("CONNECT");
+                    p.send("whatever" + Math.random()); // Or Files
+                });
+                p.on("data", (data) => {
+                    console.log("data: " + data);
+                });
+                p.on("stream", function (stream) {
+                    let video = document.getElementById("video");
+                    video.srcObject = stream;
+                    video.play();
+                });
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    </script>
+</body>
+
 </html>
