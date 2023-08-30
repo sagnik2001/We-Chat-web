@@ -17,7 +17,7 @@
     </form>
     <pre id="outgoing"></pre>
     <video src="" id="video"></video>
-    <script src="/node_modules/simple-peer/simplepeer.min.js"></script>
+    <script src="./node_modules/simple-peer/simplepeer.min.js"></script>
     <script>
         // import SimplePeer from 'simple-peer';
         // This allows you to determine whether the microphone and camera are ready for use.
@@ -49,6 +49,7 @@
                 });
                 document.querySelector("form").addEventListener("submit", (ev) => {
                     ev.preventDefault();
+                    console.log('hi')
                     p.signal(JSON.parse(document.querySelector("#incoming").value));
                 });
                 p.on("connect", () => {
