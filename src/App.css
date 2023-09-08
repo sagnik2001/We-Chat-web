@@ -13,6 +13,10 @@ body {
   font-family: "Comfortaa", cursive;
 }
 
+body {
+  overflow-y: hidden;
+}
+
 .App {
   text-align: center;
   display: flex;

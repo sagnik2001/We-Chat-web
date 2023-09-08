@@ -1,6 +1,6 @@
 .container {
   background: #002568;
-  height: 100vh;
+  height: 95vh;
   overflow-y: hidden;
 }
 
@@ -60,7 +60,7 @@
   margin-top: 1.5rem;
   border-top-right-radius: 20px;
   border-top-left-radius: 20px;
-  height: 90%;
+  height: 80%;
   max-height: calc(100vh - 120px);
   padding: 0.6rem;
   position: relative;
