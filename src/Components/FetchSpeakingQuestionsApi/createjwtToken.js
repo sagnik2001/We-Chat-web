@@ -1,5 +1,5 @@
 import CryptoJS from "crypto-js";
-const getBase64Enc = (e) => {
+export const getBase64Enc = (e) => {
     var WordArray = CryptoJS.enc.Utf8.parse(e);
     var result = CryptoJS.enc.Base64.stringify(WordArray);
     // Remove padding equal characters

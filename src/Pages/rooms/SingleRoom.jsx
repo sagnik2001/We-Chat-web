@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styles from "./SingleRoom.module.css";
 import { useWebRTC } from "../../Components/Hooks/useWebRTC";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -8,23 +8,59 @@ import { base_url } from "../../app/base_url";
 import MicButton from "../../assests/Unmute.svg"
 import MuteMicButton from "../../assests/Mute.svg"
 import CallCutButton from "../../assests/CallCut.svg"
-import ProfileSvg from "../../assests/Profile.svg"
 import { createjwt } from "../../Components/FetchSpeakingQuestionsApi/createjwtToken";
+import { useAuth } from "../../Providers/ContextProvider";
+import { BiSolidErrorAlt } from "react-icons/bi"
 // import
 
 const SingleRoom = () => {
-  const { userId, roomId } = useParams();
   const [isMuted, setMuted] = useState(false);
   const [questions, setquestions] = useState("")
+  const location = useLocation()
+  const roomId = location.state.roomId
+  const userDetails = location.state.userDetails
+  const userId = location.state.userDetails.id
+  const { localMediaStream } = useAuth()
+
+  const containerRef = useRef(null)
+  const textRef = useRef(null)
+
+  const [fontSize, setFontSize] = useState(18); // Initial font size
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const textElement = textRef.current;
+
+    const adjustFontSize = () => {
+      if (container && textElement) {
+        // Calculate the container height and text height
+        let containerHeight = container.clientHeight;
+        let textHeight = textElement.scrollHeight;
+        console.log(containerHeight, textHeight)
+
+        // Check if text overflows the container
+        if (textHeight + 250 > containerHeight) {
+          // Reduce font size by a fixed step until it fits
+          let newFontSize = fontSize;
+          while (textHeight + 250 > containerHeight) {
+            newFontSize -= 1;
+            textElement.style.fontSize = `${newFontSize}px`;
+            textHeight = textElement.scrollHeight;
+          }
+        }
+      }
+    };
+
+    // Call the adjustFontSize function whenever the text content changes
+    adjustFontSize();
+  }, [questions, fontSize]);
+
+
+
 
   // const { roomDetails, userDetails } = location.state;
 
-  console.log(roomId, "roomId", userId, "user")
-  const userDetails = {
-    id: userId,
-    name: userId,
-    profilePicture: ProfileSvg
-  }
+
 
   useEffect(() => {
     const jwt = createjwt(
@@ -54,13 +90,41 @@ const SingleRoom = () => {
 
   // console.log(roomDetails, "roomDetails", userDetails, "userDetails")
 
-  const { clients, provideRef, handleMute } = useWebRTC(roomId, userDetails);
+  const { clients, provideRef, handleMute, permissionsaccess, labelVisible } = useWebRTC(roomId, userDetails, localMediaStream);
 
-  console.log(clients,"clients")
+  console.log(clients, "clients")
 
   useEffect(() => {
     handleMute(isMuted, userDetails.id);
   }, [isMuted]);
+  const [timer, setTimer] = useState(0);
+  let time1 = 0;
+
+  useEffect(() => {
+    let timerInterval;
+
+    if (clients.length <= 1) {
+      timerInterval = setInterval(() => {
+        if (timer < 50) {
+          setTimer(timer + 1);
+          console.log(timer)
+        } else {
+          clearInterval(timerInterval);
+          console.log('Timer is over!');
+          navigate("/endCall")
+        }
+      }, 1000);
+    }
+    else {
+      clearInterval(timerInterval);
+      console.log('Timer is over! becoz new user joined');
+    }
+
+    return () => {
+      clearInterval(timerInterval);
+    };
+  }, [clients, timer]);
+
 
   const handleMuteClick = () => {
     // if (clientId !== userDetails.id) {
@@ -76,15 +140,29 @@ const SingleRoom = () => {
     navigate("/endCall");
   };
 
+  const handManualAbuse = (e) => {
+    e.preventDefault()
+    let otherpersonroomId = roomId.split(userId);
+    navigate("/reportAbuse", {
+      state: {
+        userId: userId,
+        reportUid: otherpersonroomId[1]
+      }
+    })
+  }
+
+  console.log(clients);
+
   return (
-    <div>
-      {/* <div className="container">
-        <button onClick={handManualLeave} className={styles.goBack}>
-          <MdOutlineArrowBack size={35} />
-          <span>All voice rooms</span>
-        </button>
-      </div> */}
-      <div className={styles.clientsWrap}>
+    <div className={styles.container}>
+
+      <div className={styles.clientsWrap} ref={containerRef}>
+        {clients?.length > 1 && <div style={{ display: 'flex', justifyContent: 'end', marginBottom: '10px' }} >
+          <button onClick={handManualAbuse} className={styles.actionBtn}>
+            <span>Report User</span>
+            <BiSolidErrorAlt style={{ color: 'red' }} size={25} />
+          </button>
+        </div>}
         <div className={styles.header}>
           {/* {roomDetails && <h2 className={styles.topic}>{roomDetails}</h2>} */}
           {clients?.length > 1 ? <h2 className={styles.topic}>Ask this question to your partner and practice speaking English.</h2> :
@@ -92,9 +170,9 @@ const SingleRoom = () => {
           <div className={styles.actions}>
 
             {/* <button onClick={handManualLeave} className={styles.actionBtn}>
-              <FaRegHandPeace size={35} />
-              <span>Leave quietly</span>
-            </button> */}
+            <FaRegHandPeace size={35} />
+            <span>Leave quietly</span>
+          </button> */}
           </div>
         </div>
         <div className={styles.clientsList}>
@@ -117,46 +195,53 @@ const SingleRoom = () => {
                     }}
                   />
                   {/* <button
-                    onClick={() => handleMuteClick(client.id)}
-                    className={styles.micBtn}
-                  >
-                    {isMuted ? <BsFillMicMuteFill /> : <BsFillMicFill />}
-                  </button> */}
+                  onClick={() => handleMuteClick(client.id)}
+                  className={styles.micBtn}
+                >
+                  {isMuted ? <BsFillMicMuteFill /> : <BsFillMicFill />}
+                </button> */}
                 </div>
               </div>
 
             );
           })}
         </div>
-        {clients?.length > 1 && <div className={styles.question}>
-          <h2 className={styles.topic}>{questions}</h2>
+        {clients?.length > 1 && <div className={styles.question} >
+          <div className={styles.topic} style={{ fontSize: `${fontSize}px` }} ref={textRef}>{questions}</div>
+
+
+
         </div>}
-        <div className={styles.footer}>
-          <button
-            onClick={() => handleMuteClick()}
-            className={styles.micBtn}
-          >
-            {isMuted ? <img
-              className={styles.userAvatar}
-              src={MuteMicButton}
-              alt=""
-            /> : <img
-              className={styles.userAvatar}
-              src={MicButton}
-              alt=""
-            />}
-          </button>
-          <button
-            // onClick={() => handleMuteClick(client.id)}
-            onClick={handManualLeave}
-            className={styles.micBtn}
-          >
-            <img
-              className={styles.userAvatar}
-              src={CallCutButton}
-              alt=""
-            />
-          </button>
+
+
+
+
+      </div>
+      <div className={styles.footer}>
+        <div
+          onClick={() => handleMuteClick()}
+          className={styles.micBtn}
+        >
+          {isMuted ? <img
+            className={styles.userAvatar}
+            src={MuteMicButton}
+            alt=""
+          /> : <img
+            className={styles.userAvatar}
+            src={MicButton}
+            alt=""
+          />}
+        </div>
+        <div
+          // onClick={() => handleMuteClick(client.id)}
+          onClick={handManualLeave}
+          className={styles.micBtn}
+        >
+          <img
+            className={styles.userAvatar}
+            src={CallCutButton}
+            alt=""
+          />
         </div>
       </div>
     </div>
