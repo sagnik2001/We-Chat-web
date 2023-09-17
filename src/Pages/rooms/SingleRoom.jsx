@@ -11,6 +11,7 @@ import CallCutButton from "../../assests/CallCut.svg"
 import { createjwt } from "../../Components/FetchSpeakingQuestionsApi/createjwtToken";
 import { useAuth } from "../../Providers/ContextProvider";
 import { BiSolidErrorAlt } from "react-icons/bi"
+import AudioAnalyser from "./AudioAnalyser";
 // import
 
 const SingleRoom = () => {
@@ -214,10 +215,11 @@ const SingleRoom = () => {
         </div>}
 
 
-
+        {localMediaStream.current ? <div className={styles.audiovisualize}><AudioAnalyser audio={localMediaStream.current} /></div> : ''}
 
       </div>
       <div className={styles.footer}>
+
         <div
           onClick={() => handleMuteClick()}
           className={styles.micBtn}
