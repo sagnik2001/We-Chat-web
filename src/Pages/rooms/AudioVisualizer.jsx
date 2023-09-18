@@ -26,7 +26,7 @@ const AudioVisualiser = ({ audioData }) => {
     context.stroke();
   }, [audioData]);
 
-  return <canvas width="100" height="100" ref={canvasRef} />;
+  return <canvas width="25" height="25" ref={canvasRef} />;
 };
 
 export default AudioVisualiser;
