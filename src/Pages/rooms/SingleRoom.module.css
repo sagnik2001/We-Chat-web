@@ -69,7 +69,13 @@
 
 }
 
-.audiovisualize{
+.uservisualize {
+  position: absolute;
+  bottom: 50%;
+  left: 100%;
+}
+
+.audiovisualize {
   position: absolute;
   bottom: 0px;
   right: 10px;

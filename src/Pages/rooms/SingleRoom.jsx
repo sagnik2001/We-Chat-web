@@ -21,7 +21,7 @@ const SingleRoom = () => {
   const roomId = location.state.roomId
   const userDetails = location.state.userDetails
   const userId = location.state.userDetails.id
-  const { localMediaStream } = useAuth()
+  const { localMediaStream ,audioMediaRefOfUsers} = useAuth()
 
   const containerRef = useRef(null)
   const textRef = useRef(null)
@@ -91,9 +91,9 @@ const SingleRoom = () => {
 
   // console.log(roomDetails, "roomDetails", userDetails, "userDetails")
 
-  const { clients, provideRef, handleMute, permissionsaccess, labelVisible } = useWebRTC(roomId, userDetails, localMediaStream);
+  const { clients, provideRef, handleMute, audioElements } = useWebRTC(roomId, userDetails, localMediaStream);
 
-  console.log(clients, "clients")
+  console.log(audioMediaRefOfUsers, "audioclients1")
 
   useEffect(() => {
     handleMute(isMuted, userDetails.id);
@@ -195,6 +195,8 @@ const SingleRoom = () => {
                       provideRef(instance, client.id);
                     }}
                   />
+                  {console.log(audioMediaRefOfUsers.current[client.id],"pi")}
+                  {audioMediaRefOfUsers.current[client.id] ? <div className={styles.uservisualize}><AudioAnalyser audio={audioMediaRefOfUsers.current[client.id]} /></div> : ''}
                   {/* <button
                   onClick={() => handleMuteClick(client.id)}
                   className={styles.micBtn}

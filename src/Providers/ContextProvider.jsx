@@ -15,6 +15,8 @@ export const useAuth = () => useContext(AuthContext);
 export default function AuthContextProvider(props) {
     const localMediaStream = useRef(null)
     const navigate = useNavigate()
+    const audioMediaRefOfUsers = useRef({});
+    const [audioMediaRefUpdated, setAudioMediaRefUpdated] = useState(0);
 
     const createjwt = (uid, platform, reportUid, reportReason) => {
         // Header
@@ -71,7 +73,9 @@ export default function AuthContextProvider(props) {
 
     const value = {
         localMediaStream,
-        handleReportAbuse
+        handleReportAbuse,
+        audioMediaRefOfUsers,
+        setAudioMediaRefUpdated
     }
     return (
         <AuthContext.Provider value={value}>{props.children}</AuthContext.Provider>

@@ -4,6 +4,7 @@ import { socketInit } from "../Socket";
 import { ACTIONS } from "../Actions/Actions";
 import freeice from "freeice";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../Providers/ContextProvider";
 
 const users = [
   {
@@ -23,6 +24,7 @@ export const useWebRTC = (roomId, user, localMediaStream) => {
   const socket = useRef(null);
   const clientsRef = useRef(null);
   const navigate = useNavigate()
+  const { audioMediaRefOfUsers, setAudioMediaRefUpdated } = useAuth()
 
   const addNewClient = useCallback(
     (newClient, cb) => {
@@ -129,11 +131,16 @@ export const useWebRTC = (roomId, user, localMediaStream) => {
 
           if (audioElements.current[remoteUser.id]) {
             audioElements.current[remoteUser.id].srcObject = remoteStream;
+            audioMediaRefOfUsers.current[remoteUser.id] = remoteStream;
+            setAudioMediaRefUpdated(prevValue => prevValue + 1);
+
           } else {
             let settled = false;
             const interval = setInterval(() => {
               if (audioElements.current[remoteUser.id]) {
                 audioElements.current[remoteUser.id].srcObject = remoteStream;
+                audioMediaRefOfUsers.current[remoteUser.id] = remoteStream;
+                setAudioMediaRefUpdated(prevValue => prevValue + 1);
                 settled = true;
               }
 
@@ -288,6 +295,6 @@ export const useWebRTC = (roomId, user, localMediaStream) => {
     clients,
     provideRef,
     handleMute,
- 
+    audioElements
   };
 };
