@@ -12,6 +12,7 @@ import { createjwt } from "../../Components/FetchSpeakingQuestionsApi/createjwtT
 import { useAuth } from "../../Providers/ContextProvider";
 import { BiSolidErrorAlt } from "react-icons/bi"
 import AudioAnalyser from "./AudioAnalyser";
+import { BsFillMicMuteFill } from "react-icons/bs"
 // import
 
 const SingleRoom = () => {
@@ -21,7 +22,7 @@ const SingleRoom = () => {
   const roomId = location.state.roomId
   const userDetails = location.state.userDetails
   const userId = location.state.userDetails.id
-  const { localMediaStream ,audioMediaRefOfUsers} = useAuth()
+  const { localMediaStream, audioMediaRefOfUsers } = useAuth()
 
   const containerRef = useRef(null)
   const textRef = useRef(null)
@@ -63,31 +64,7 @@ const SingleRoom = () => {
 
 
 
-  useEffect(() => {
-    const jwt = createjwt(
-      userId,
-      "webviewCall"
-    );
-    var bodyFormData = new FormData();
-    bodyFormData.append("encrptData", jwt);
-    axios({
-      method: "post",
-      url: `${base_url}fetchQuestionForSpeakingPractice/`,
-      data: bodyFormData,
-      headers: { "Content-Type": "multipart/form-data" },
-    })
-      .then((res) => {
-        if (res.status === 200) {
-          console.log(res, "res");
-          setquestions(res.data.data.question)
-        } else {
-          console.log("Api Status is not 200");
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, [userId])
+
 
   // console.log(roomDetails, "roomDetails", userDetails, "userDetails")
 
@@ -195,8 +172,10 @@ const SingleRoom = () => {
                       provideRef(instance, client.id);
                     }}
                   />
-                  {console.log(audioMediaRefOfUsers.current[client.id],"pi")}
-                  {audioMediaRefOfUsers.current[client.id] ? <div className={styles.uservisualize}><AudioAnalyser audio={audioMediaRefOfUsers.current[client.id]} /></div> : ''}
+                  {console.log(client)}
+                  {client.muted && <BsFillMicMuteFill />}
+                  {console.log(audioMediaRefOfUsers.current[client.id], "pi")}
+                  {audioMediaRefOfUsers.current[client.id] && !client.muted ? <div className={styles.uservisualize}><AudioAnalyser audio={audioMediaRefOfUsers.current[client.id]} /></div> : ''}
                   {/* <button
                   onClick={() => handleMuteClick(client.id)}
                   className={styles.micBtn}
@@ -209,12 +188,6 @@ const SingleRoom = () => {
             );
           })}
         </div>
-        {clients?.length > 1 && <div className={styles.question} >
-          <div className={styles.topic} style={{ fontSize: `${fontSize}px` }} ref={textRef}>{questions}</div>
-
-
-
-        </div>}
 
 
         {localMediaStream.current ? <div className={styles.audiovisualize}><AudioAnalyser audio={localMediaStream.current} /></div> : ''}

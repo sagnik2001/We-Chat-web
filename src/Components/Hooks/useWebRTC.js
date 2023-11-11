@@ -54,7 +54,7 @@ export const useWebRTC = (roomId, user, localMediaStream) => {
 
 
 
-      addNewClient({ ...user, muted: true }, () => {
+      addNewClient({ ...user, muted: false }, () => {
         console.log(audioElements)
         const localElement = audioElements.current[user.id];
         console.log(localElement);
@@ -109,7 +109,7 @@ export const useWebRTC = (roomId, user, localMediaStream) => {
       };
 
       console.log(connections.current[peerId], "li")
-      addNewClient({ ...remoteUser, muted: true }, () => {
+      addNewClient({ ...remoteUser, muted: false }, () => {
         // get current users mute info
         const currentUser = clientsRef.current.find(
           (client) => client.id === user.id
@@ -221,7 +221,20 @@ export const useWebRTC = (roomId, user, localMediaStream) => {
       console.log(allConnectedClients, "all");
       if (clientIdx > -1) {
         allConnectedClients[clientIdx].muted = mute;
-        setClients(allConnectedClients);
+        // setClients(allConnectedClients);
+        setClients((prevClients) => {
+          // Make a copy of the previous state
+          const updatedClients = [...prevClients];
+
+
+          updatedClients[clientIdx] = {
+            ...updatedClients[clientIdx],
+            muted: mute,
+          };
+
+          // Return the updated state
+          return updatedClients;
+        });
       }
 
     };
